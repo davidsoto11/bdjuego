@@ -2,6 +2,8 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { ROOMS, questionScore } = require('../content.js');
 const questions = ROOMS.flatMap((room) => room.questions);
+const fs = require('node:fs');
+const path = require('node:path');
 
 test('el recorrido contiene cinco salas, veinte pruebas y un máximo de diez puntos', () => {
   assert.equal(ROOMS.length, 5);
@@ -37,4 +39,18 @@ test('las asociaciones requieren todas las filas correctas y en su lugar', () =>
   assert.equal(questionScore(q, [...q.answer].reverse(), false), 0);
   assert.equal(questionScore(q, [...q.answer, 'extra'], false), 0);
   assert.equal(questionScore(q, q.answer, true), 0.25);
+});
+
+test('cada sala aporta contexto y planos SVG locales con descripción accesible', () => {
+  for (const room of ROOMS) {
+    assert.ok(room.context);
+    assert.ok(room.diagrams.length > 0);
+    for (const diagram of room.diagrams) {
+      assert.ok(diagram.title && diagram.description.length > 100);
+      const svg = fs.readFileSync(path.join(__dirname, '..', diagram.src), 'utf8');
+      assert.match(svg, /viewBox="0 0 1100 /);
+      assert.doesNotMatch(svg, /<script|<foreignObject|https?:\/\/(?!www.w3.org)/);
+    }
+  }
+  assert.equal(ROOMS.flatMap(room => room.diagrams).length, 6);
 });

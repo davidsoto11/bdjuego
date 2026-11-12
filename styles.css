@@ -668,112 +668,112 @@ p {
   font-size: 32px;
   flex-shrink: 0;
 }
-.diagram-panel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 130px;
-  padding: 20px;
-  background:
-    radial-gradient(ellipse at center, #b7a0ff0c, transparent 70%), #14182b;
+.case-file {
+  margin: 25px 0;
+  padding: 22px;
   border: 1px solid var(--border);
-  border-radius: 12px;
-  margin: 24px 0;
-  overflow: auto;
+  border-radius: 13px;
+  background: #171b30;
 }
-.er-diagram {
+.case-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-width: 500px;
-  gap: 0;
-  font: 500 12px var(--heading);
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 12px;
 }
-.entity {
-  border: 1.5px solid var(--purple);
-  background: #b7a0ff0d;
-  border-radius: 3px;
-  padding: 13px 16px;
-  text-align: center;
-  min-width: 95px;
+.case-header h2 {
+  font-size: 20px;
+  letter-spacing: -0.5px;
+  margin: 0;
 }
-.entity.weak {
-  outline: 1px solid var(--purple);
-  outline-offset: 4px;
-}
-.er-line {
-  height: 1px;
-  min-width: 35px;
-  background: #8675ae;
-}
-.relationship {
-  border: 1.5px solid var(--orange);
-  background: #ffb58708;
-  transform: rotate(-35deg);
-  width: 84px;
-  height: 62px;
-  display: grid;
-  place-items: center;
-  margin: 0 10px;
-}
-.relationship span {
-  transform: rotate(35deg);
+.case-header span {
+  color: var(--mint);
   font-size: 10px;
-  color: var(--orange);
 }
-.attribute {
-  border: 1.5px solid var(--mint);
-  background: #80d9cb08;
-  border-radius: 50%;
-  padding: 9px 17px;
-  color: var(--mint);
+.case-context {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #cecee0;
 }
-.attribute.key {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+.plan-figure {
+  margin: 20px 0 0;
 }
-.cardinality-label {
-  color: var(--mint);
-  padding: 0 10px;
-  font-size: 14px;
-}
-.hierarchy-diagram {
-  display: grid;
-  justify-items: center;
-  gap: 10px;
-}
-.hierarchy-branches {
+.plan-figure figcaption {
   display: flex;
-  gap: 30px;
-  position: relative;
-  padding-top: 18px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 12px;
 }
-.hierarchy-branches:before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 45px;
-  right: 45px;
-  border-top: 1px solid #8675ae;
-}
-.hierarchy-branches .entity:before {
-  content: "";
+.plan-image {
   display: block;
-  position: absolute;
-  top: 0;
-  height: 18px;
-  width: 1px;
-  background: #8675ae;
+  width: 100%;
+  height: auto;
+  border-radius: 9px;
+  background: #f7f9fd;
 }
-.hierarchy-branches .entity {
-  font-size: 11px;
-  min-width: 90px;
-}
-.diagram-caption {
-  text-align: center;
-  margin-top: 10px;
-  font-size: 10px;
+.plan-description {
+  margin-top: 9px;
   color: var(--muted);
+  font-size: 11px;
+}
+.plan-description summary {
+  cursor: pointer;
+  padding: 5px 0;
+}
+.plan-description p {
+  line-height: 1.8;
+  padding: 10px 0;
+  margin: 0;
+}
+.plan-legend {
+  font-size: 10px;
+  line-height: 1.8;
+  color: var(--muted);
+  margin: 16px 0 0;
+}
+.plan-dialog {
+  width: calc(100% - 32px);
+  max-width: 1500px;
+  padding: 22px;
+}
+.plan-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+.plan-dialog-header h2 {
+  font-size: 23px;
+  margin: 0;
+}
+.plan-dialog > .muted {
+  margin: 10px 0;
+}
+.plan-zoom {
+  overflow: auto;
+  max-height: 70vh;
+  border-radius: 10px;
+  background: #f7f9fd;
+}
+.plan-zoom img {
+  display: block;
+  width: 1320px;
+  max-width: none;
+}
+.legacy-notice {
+  font-size: 13px;
+  padding: 18px;
+  border: 1px solid #ffb58755;
+  background: #ffb58709;
+  border-radius: 10px;
+  color: #e9d1c3;
+}
+.legacy-notice a {
+  color: var(--orange);
+  text-underline-offset: 3px;
 }
 .questions {
   display: grid;
@@ -1636,45 +1636,29 @@ dialog .muted {
   .room-story {
     font-size: 13px;
   }
-  .diagram-panel {
-    padding: 18px 10px;
-    justify-content: center;
+  .case-file {
+    padding: 15px;
   }
-  .er-diagram {
-    min-width: 0;
-    width: 100%;
-    gap: 0;
+  .case-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
   }
-  .entity {
-    min-width: 65px;
-    padding: 11px 7px;
-    font-size: 10px;
+  .case-header h2 {
+    font-size: 18px;
   }
-  .er-line {
-    min-width: 12px;
+  .plan-figure figcaption {
+    align-items: flex-start;
+    flex-direction: column;
   }
-  .relationship {
-    width: 60px;
-    height: 48px;
+  .plan-dialog {
+    padding: 16px;
+  }
+  .plan-dialog-header h2 {
+    font-size: 17px;
+  }
+  .plan-dialog-header .button {
     flex-shrink: 0;
-    margin: 0 8px;
-  }
-  .relationship span {
-    font-size: 8px;
-  }
-  .cardinality-label {
-    font-size: 11px;
-    padding: 0 4px;
-  }
-  .attribute {
-    padding: 9px 12px;
-  }
-  .hierarchy-branches {
-    gap: 15px;
-  }
-  .hierarchy-branches .entity {
-    min-width: 70px;
-    font-size: 9px;
   }
   .question-card {
     padding: 18px 15px;

@@ -1,9 +1,10 @@
-const STORAGE_KEY = 'protocolo-er-v1';
+const STORAGE_KEY = 'protocolo-er-v2';
 const main = document.querySelector('#main');
 const helpDialog = document.querySelector('#help-dialog');
 let state = null;
 let storageAvailable = true;
 let damagedSave = false;
+let hasLegacySave = false;
 let timer;
 
 const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
@@ -24,7 +25,7 @@ function validAnswer(question, answer) {
 }
 
 function validSave(saved) {
-  if (!saved || saved.version !== 1 || typeof saved.id !== 'string' || !saved.id || saved.id.length > 100 ||
+  if (!saved || saved.version !== 2 || typeof saved.id !== 'string' || !saved.id || saved.id.length > 100 ||
       !saved.student || typeof saved.student.name !== 'string' || !saved.student.name.trim() || saved.student.name.length > 90 ||
       typeof saved.student.group !== 'string' || !saved.student.group.trim() || saved.student.group.length > 60 ||
       !Number.isFinite(saved.startedAt) || saved.startedAt <= 0 || saved.startedAt > Date.now() ||
@@ -44,6 +45,7 @@ function validSave(saved) {
 }
 
 try {
+  hasLegacySave = !!localStorage.getItem('protocolo-er-v1');
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) {
     const saved = JSON.parse(raw);
@@ -78,15 +80,16 @@ function renderLanding() {
   main.innerHTML = `<div class="landing">
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <div class="mission-label"><span class="status-dot"></span> Misión 02 · Diseño conceptual</div>
+        <div class="mission-label"><span class="status-dot"></span> Edición 2 · Interpreta los planos</div>
         <h1 id="hero-title">Los datos están<br>encerrados.<br><span>Tú tienes la llave.</span></h1>
         <p class="hero-description">Un laboratorio en silencio. Cinco puertas bloqueadas. Y un único camino de salida: dominar el modelo Entidad–Relación.</p>
         <div class="hero-actions"><button class="button primary" id="enter-button" type="button">${state ? 'Retomar la misión' : 'Acepto la misión'} <span class="arrow" aria-hidden="true">↗</span></button><span class="muted">Sin registro.<br>Solo tú y tu ingenio.</span></div>
-        <div class="hero-meta"><span><b aria-hidden="true">◷</b> ≈ 25 minutos</span><span><b aria-hidden="true">◇</b> 5 salas · 20 pruebas</span><span><b aria-hidden="true">↓</b> Informe PDF</span></div>
+        <div class="hero-meta"><span><b aria-hidden="true">◷</b> ≈ 35 minutos</span><span><b aria-hidden="true">◇</b> 5 salas · 20 pruebas</span><span><b aria-hidden="true">↓</b> Informe PDF</span></div>
       </div>
       <div class="hero-art"><img src="assets/laboratory.svg" alt="Laboratorio isométrico con un diagrama entidad–relación, un ordenador y una puerta de salida bloqueada" width="800" height="660"><div class="floating-label label-a"><span class="tiny-icon" aria-hidden="true">⌘</span><span><strong>Sistema bloqueado</strong>Esperando a un agente…</span></div><div class="floating-label label-b"><span class="tiny-icon" aria-hidden="true">◇</span><span><strong>Protocolo de salida</strong>Reconstruye el modelo E·R</span></div></div>
     </section>
     ${storageNotice()}
+    ${hasLegacySave ? '<p class="legacy-notice">Tienes una partida de la edición anterior. <a href="version-1/">Retómala o descarga su informe aquí</a>. Esta edición conserva ese intento sin mezclar las notas.</p>' : ''}
     ${damagedSave ? '<p class="storage-warning" role="status">La partida guardada no se puede recuperar. Inicia una nueva misión para continuar.</p>' : ''}
     ${state ? `<section class="resume-panel" id="resume-panel"><div><strong>Tu misión sigue aquí, ${escapeHTML(state.student.name)}.</strong><p>${state.finishedAt ? 'Has completado el recorrido. Tu informe está disponible.' : `${state.submitted.length} de 5 salas completadas. Puedes continuar donde lo dejaste.`}</p></div><div class="resume-actions"><button class="button mint" id="resume-button">${state.finishedAt ? 'Ver mi informe' : 'Continuar'}</button><button class="button ghost small" id="restart-button">Nueva partida</button></div></section>` : ''}
     <section class="start-panel" id="start-panel" hidden aria-labelledby="start-title"><h2 id="start-title">Identifícate, agente.</h2><p class="muted">Estos datos aparecerán en el informe que entregarás en Moodle.</p><form id="start-form" class="start-form"><div class="field"><label for="student-name">Nombre y apellidos</label><input id="student-name" name="name" autocomplete="name" placeholder="Tu nombre completo" maxlength="90" required></div><div class="field"><label for="student-group">Curso y grupo</label><input id="student-group" name="group" placeholder="Ej. 1.º DAM · Grupo A" maxlength="60" required></div><button class="button primary" type="submit">Entrar al laboratorio <span aria-hidden="true">↗</span></button></form><p class="form-note">20 pruebas × 0,5 puntos. Cada acierto con pista vale 0,25. En las asociaciones deben acertarse todas las filas. Sin límite de tiempo.</p></section>
@@ -118,7 +121,7 @@ function startGame(event) {
       return;
     }
   }
-  state = { version: 1, id: crypto.randomUUID(), student: { name: nameInput.value.trim(), group: groupInput.value.trim() }, startedAt: Date.now(), finishedAt: null, room: 0, submitted: [], answers: {}, hints: {} };
+  state = { version: 2, id: crypto.randomUUID(), student: { name: nameInput.value.trim(), group: groupInput.value.trim() }, startedAt: Date.now(), finishedAt: null, room: 0, submitted: [], answers: {}, hints: {} };
   damagedSave = false;
   save();
   renderRoom();
@@ -148,29 +151,20 @@ function confirmRestart() {
   dialog.showModal();
 }
 
-function diagram(type) {
-  const entity = (name) => `<span class="entity">${name}</span>`;
-  const line = '<span class="er-line"></span>';
-  const relation = (name) => `<span class="relationship"><span>${name}</span></span>`;
-  let body;
-  let label;
-  if (type === 'entities') {
-    body = entity('USUARIO') + line + relation('ALQUILAR') + line + entity('BICICLETA');
-    label = 'USUARIO y BICICLETA se conectan mediante ALQUILAR.';
-  } else if (type === 'attributes') {
-    body = '<span class="attribute key">dni</span>' + line + entity('EMPLEADO') + line + '<span class="attribute">nombre</span>';
-    label = 'EMPLEADO tiene los atributos dni, subrayado como identificador, y nombre.';
-  } else if (type === 'relations') {
-    body = entity('CLIENTE') + line + relation('COMPRAR') + line + entity('PRODUCTO');
-    label = 'La relación COMPRAR conecta CLIENTE y PRODUCTO.';
-  } else if (type === 'cardinality') {
-    body = entity('ALUMNO') + '<span class="cardinality-label">N</span>' + line + relation('MATRICULAR') + line + '<span class="cardinality-label">M</span>' + entity('ASIGNATURA');
-    label = 'ALUMNO se matricula en ASIGNATURA: relación muchos a muchos.';
-  } else {
-    body = `<div class="hierarchy-diagram">${entity('VEHICULO')}<span class="muted">│</span><div class="hierarchy-branches">${entity('CAMION')}${entity('AUTOBUS')}${entity('MOTO')}</div></div>`;
-    label = 'VEHICULO es la superclase de CAMION, AUTOBUS y MOTO.';
-  }
-  return `<div class="diagram-panel" role="img" aria-label="${label}"><div class="er-diagram" aria-hidden="true">${body}</div></div>`;
+function diagram(room) {
+  return `<section class="case-file" aria-label="Planos y requisitos de la sala"><div class="case-header"><h2>Expediente de la sala</h2><span>Lectura de diagramas · Nivel intermedio</span></div><p class="case-context">${escapeHTML(room.context)}</p>${room.diagrams.map((plan, index) => `<figure class="plan-figure"><figcaption><strong>${escapeHTML(plan.title)}</strong><button class="button ghost small" data-open-plan="${index}" type="button" aria-label="Ampliar plano ${escapeHTML(plan.title)}">⛶ Ampliar plano</button></figcaption><img class="plan-image" src="${plan.src}" alt="${escapeHTML(plan.description)}" width="1100" loading="eager"><details class="plan-description"><summary>Leer descripción del plano</summary><p>${escapeHTML(plan.description)}</p></details></figure>`).join('')}<p class="plan-legend">Notación: cada (mín,máx) se lee junto a su entidad de origen. Las etiquetas A, B y C son incógnitas, no cardinalidades resueltas.</p></section>`;
+}
+
+function openPlan(room, index) {
+  const plan = room.diagrams[index];
+  const dialog = document.createElement('dialog');
+  dialog.className = 'plan-dialog';
+  dialog.setAttribute('aria-labelledby', 'plan-dialog-title');
+  dialog.innerHTML = `<div class="plan-dialog-header"><h2 id="plan-dialog-title">${escapeHTML(plan.title)}</h2><button class="button ghost small" data-close-plan type="button">Cerrar plano</button></div><p class="muted">Desplázate por el plano ampliado para leer todos sus detalles.</p><div class="plan-zoom" tabindex="0" role="region" aria-label="Plano ampliado; utiliza las flechas para desplazarte"><img src="${plan.src}" alt="${escapeHTML(plan.description)}" width="1320"></div>`;
+  document.body.append(dialog);
+  dialog.querySelector('[data-close-plan]').onclick = () => dialog.close();
+  dialog.addEventListener('close', () => dialog.remove(), { once: true });
+  dialog.showModal();
 }
 
 function questionHTML(question, index, locked = false) {
@@ -198,11 +192,12 @@ function renderRoom() {
   const locked = state.submitted.includes(room.id);
   main.innerHTML = `<div class="game">${storageNotice()}<div class="mission-bar"><span class="agent-name">Agente <strong>${escapeHTML(state.student.name)}</strong></span><div class="mission-stats"><span>◷ <span id="elapsed">${duration()}</span></span><span>Llaves <strong>${state.submitted.length}/5</strong></span></div></div><div class="game-layout">
     <aside class="sidebar" aria-label="Mapa de la misión"><p class="map-heading">Tu recorrido por el laboratorio</p>${ROOMS.map((item, i) => `<div role="group" aria-label="Sala ${i + 1}: ${item.name}${state.submitted.includes(item.id) ? ", completada" : i === state.room ? ", sala actual" : ", bloqueada"}" class="map-item ${i === state.room ? 'active' : ''} ${i > state.room ? 'locked' : ''}" style="--room-color:${item.color}" ${i === state.room ? 'aria-current="step"' : ''}><span class="room-icon" aria-hidden="true">${state.submitted.includes(item.id) ? '✓' : item.icon}</span><div><h3>${item.name}</h3><p>${i === state.room ? 'Estás aquí' : state.submitted.includes(item.id) ? 'Completada' : 'Puerta bloqueada'}</p></div><span class="map-status" aria-hidden="true">${state.submitted.includes(item.id) ? '✓' : i > state.room ? '·' : ''}</span></div>`).join('')}<div class="sidebar-note">Protocolo de salida<div class="key-slots">${ROOMS.map((item) => `<span class="key-slot ${state.submitted.includes(item.id) ? 'found' : ''}">${state.submitted.includes(item.id) ? item.key : '·'}</span>`).join('')}</div><p>Cada sala completada recupera una letra del protocolo. La nota depende de tus respuestas.</p><button class="button ghost small" id="home-button" type="button">Guardar y salir</button></div></aside>
-    <section class="room-content" style="--room-color:${room.color}" aria-labelledby="room-title"><div class="room-heading"><div><span class="eyebrow">Sala 0${state.room + 1} / 05 · ${room.topic}</span><h1 id="room-title">${room.name}</h1><p class="room-story">${room.story}</p></div><span class="room-icon" aria-hidden="true">${room.icon}</span></div>${diagram(room.diagram)}
+    <section class="room-content" style="--room-color:${room.color}" aria-labelledby="room-title"><div class="room-heading"><div><span class="eyebrow">Sala 0${state.room + 1} / 05 · ${room.topic}</span><h1 id="room-title">${room.name}</h1><p class="room-story">${room.story}</p></div><span class="room-icon" aria-hidden="true">${room.icon}</span></div>${diagram(room)}
     <form id="room-form" novalidate><div class="questions">${room.questions.map((q, i) => questionHTML(q, i, locked)).join('')}</div>
     ${!locked ? '<div class="submit-panel"><p>Comprueba las cuatro pruebas para abrir la puerta. Al comprobar, las respuestas quedarán cerradas.</p><button class="button primary" type="submit">Comprobar y abrir puerta <span aria-hidden="true">↗</span></button></div><p id="room-error" class="form-error" role="alert"></p>' : ''}</form>
     ${locked ? `<section class="room-unlocked" id="unlocked" tabindex="-1"><div class="unlocked-header"><span class="earned-key">${room.key}</span><div><h2>Puerta abierta. Llave recuperada.</h2><p>Has conseguido ${number(roomScore(room))} de 2 puntos en esta sala. Revisa las explicaciones antes de continuar.</p></div></div><button id="next-button" class="button mint" type="button">${state.room === 4 ? 'Activar la salida y ver mi nota' : 'Entrar en la siguiente sala'} <span aria-hidden="true">↗</span></button></section>` : ''}
     </section></div></div>`;
+  document.querySelectorAll('[data-open-plan]').forEach((button) => button.onclick = () => openPlan(room, Number(button.dataset.openPlan)));
   document.querySelector('#home-button').onclick = () => { save(); renderLanding(); focusMain(); };
   document.querySelector('#room-form').addEventListener('change', (event) => {
     const input = event.target;
@@ -288,7 +283,7 @@ async function downloadReport() {
   status.textContent = 'Preparando tu informe…';
   try {
     if (!window.jspdf?.jsPDF) throw new Error('PDF library unavailable');
-    const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
+    const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', compress: true });
     doc.setProperties({ title: `Informe Protocolo ER - ${state.student.name}`, subject: 'Resultados de la actividad Modelo Entidad-Relación', author: state.student.name });
     const pageWidth = 174;
     let y = 20;
@@ -310,7 +305,7 @@ async function downloadReport() {
     doc.setFillColor(29, 28, 53);
     doc.rect(0, 0, 210, 49, 'F');
     write('PROTOCOLO E.R', 24, true, [211, 193, 255]);
-    write('Informe individual de la actividad', 12, false, [239, 235, 255]);
+    write('Informe individual - Edición 2: interpretación de planos', 12, false, [239, 235, 255]);
     write('Tema 2 - Diseño conceptual: Modelo Entidad-Relación', 10, false, [207, 202, 227]);
     y = 60;
     write(`Alumno/a: ${state.student.name}`, 12, true);
@@ -331,13 +326,29 @@ async function downloadReport() {
     y += 4;
     write('Entrega: sube este PDF a la tarea de Moodle y confirma la entrega.', 10, true);
     write('Informe generado en el navegador. La referencia identifica el intento; no es una firma ni una certificación de identidad o de integridad de la nota.', 8, false, [100, 100, 115]);
-    doc.addPage();
-    y = 20;
-    write('Detalle completo de las respuestas', 18, true, [97, 66, 155]);
     for (const room of ROOMS) {
-      if (y > 230) { doc.addPage(); y = 20; }
-      y += 4;
-      write(`${room.name} - ${number(roomScore(room))} / 2`, 14, true);
+      doc.addPage();
+      y = 20;
+      write(`${room.name} - ${number(roomScore(room))} / 2`, 16, true, [97, 66, 155]);
+      write(room.context, 9);
+      for (const plan of room.diagrams) {
+        const image = new Image();
+        image.src = plan.src;
+        await image.decode();
+        const height = pageWidth * image.naturalHeight / image.naturalWidth;
+        if (y + height + 12 > 277) { doc.addPage(); y = 20; }
+        write(plan.title, 11, true);
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth * 2;
+        canvas.height = image.naturalHeight * 2;
+        const context = canvas.getContext('2d');
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        doc.addImage(canvas.toDataURL('image/jpeg', 0.94), 'JPEG', 18, y, pageWidth, height);
+        y += height + 5;
+        write(`Descripción del plano: ${plan.description}`, 8);
+      }
       for (const question of room.questions) {
         if (y > 228) { doc.addPage(); y = 20; }
         y += 3;

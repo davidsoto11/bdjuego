@@ -48,17 +48,29 @@ with sync_playwright() as p:
     assert 'Responde todas' in page.locator('#room-error').inner_text()
     assert page.locator('#next-button').count() == 0
     page.locator('[data-hint=q1]').click()
-    page.locator('#q1-0').select_option('Entidad')
+    page.locator('#q1-0').select_option('Entidad fuerte')
     page.reload()
     page.locator('#resume-button').click()
-    assert page.locator('#q1-0').input_value() == 'Entidad'
+    assert page.locator('#q1-0').input_value() == 'Entidad fuerte'
     assert page.locator('#hint-q1').is_visible()
     page.screenshot(path=str(OUT / 'sala-desktop.png'), full_page=True)
+    page.locator('[data-open-plan]').first.click()
+    assert page.locator('.plan-dialog').is_visible()
+    assert page.locator('.plan-zoom img').evaluate('(img) => img.naturalWidth') == 1100
+    page.screenshot(path=str(OUT / 'plano-ampliado.png'))
+    page.keyboard.press('Escape')
+    page.locator('.plan-dialog').wait_for(state='detached')
     for i, room in enumerate(ROOMS):
+        assert page.locator('.plan-image').count() == len(room['diagrams'])
+        page.locator('.plan-image').evaluate_all('(imgs) => Promise.all(imgs.map(img => img.decode()))')
+        assert page.locator('.plan-image').evaluate_all('(imgs) => imgs.every(img => img.complete && img.naturalWidth === 1100)')
+        page.locator('.case-file').screenshot(path=str(OUT / f'plano-sala-{i+1}.png'))
         answer_room(page, room)
         # Una respuesta errónea y una pista: nota esperada 9,25 / 10.
         if i == 0:
-            page.get_by_role('radio', name='El atributo estado', exact=True).check()
+            q = room['questions'][1]
+            wrong = next(option for option in q['options'] if option != q['answer'])
+            page.locator('#card-q2').get_by_role('radio', name=wrong, exact=True).check()
         page.locator('#room-form button[type=submit]').click()
         assert page.locator('#unlocked').is_visible()
         assert page.locator('#room-form input:not(:disabled), #room-form select:not(:disabled)').count() == 0
@@ -76,12 +88,16 @@ with sync_playwright() as p:
         page.locator('#download-button').click()
     download = info.value
     download.save_as(OUT / 'informe-prueba.pdf')
+    assert (OUT / 'informe-prueba.pdf').stat().st_size < 3_000_000
     assert download.suggested_filename.startswith('Informe_ER_Lucia_Munoz_Garcia_')
     text = subprocess.check_output(['pdftotext', '-layout', str(OUT / 'informe-prueba.pdf'), '-']).decode()
     assert 'NOTA FINAL: 9,25 / 10' in text
     assert 'Lucía Muñoz García' in text
     assert 'Pistas usadas: 1' in text
-    assert '20. La regla que no cabe en el plano' in text
+    assert '20. Reprograma la última restricción' in text
+    assert text.count('Descripción del plano:') == 6
+    image_list = subprocess.check_output(['pdfimages', '-list', str(OUT / 'informe-prueba.pdf')]).decode()
+    assert sum(' image ' in line for line in image_list.splitlines()) >= 6
     assert text.count('Respuesta del alumno:') == 20
     assert text.count('Respuesta correcta:') == 20
     assert '0,25 / 0,5' in text
@@ -94,7 +110,7 @@ with sync_playwright() as p:
     page.locator('#restart-button').click()
     page.get_by_role('button', name='Empezar de nuevo', exact=True).click()
     assert page.locator('#start-panel').is_visible()
-    assert page.evaluate('localStorage.getItem("protocolo-er-v1")') is None
+    assert page.evaluate('localStorage.getItem("protocolo-er-v2")') is None
     assert not errors, errors
     print('OK: validación, pistas, nota mixta, cierre de respuestas, recarga, PDF completo, reinicio.')
 
@@ -107,6 +123,10 @@ with sync_playwright() as p:
     page.screenshot(path=str(OUT / 'sala-mobile.png'), full_page=True)
     assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
     for room in ROOMS:
+        assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
+        page.locator('[data-open-plan]').first.click()
+        assert page.locator('.plan-zoom').evaluate('(el) => el.scrollWidth > el.clientWidth')
+        page.locator('[data-close-plan]').click()
         answer_room(page, room, wrong=True)
         page.locator('#room-form button[type=submit]').click()
         page.locator('#next-button').click()
@@ -118,7 +138,7 @@ with sync_playwright() as p:
     corrupt = browser.new_context()
     page = corrupt.new_page()
     page.goto(URL)
-    page.evaluate('localStorage.setItem("protocolo-er-v1", "{bad JSON")')
+    page.evaluate('localStorage.setItem("protocolo-er-v2", "{bad JSON")')
     page.reload()
     assert 'no se puede recuperar' in page.locator('.storage-warning[role=status]').inner_text()
     start(page, '<script>alert(1)</script>')
@@ -135,4 +155,20 @@ with sync_playwright() as p:
     page.locator('#room-form button[type=submit]').click()
     assert page.locator('#next-button').is_visible()
     print('OK: se puede jugar sin almacenamiento local.')
+    legacy = browser.new_context()
+    page = legacy.new_page()
+    page.goto(URL.rstrip('/') + '/version-1/')
+    page.locator('#enter-button').click()
+    page.locator('#student-name').fill('Intento anterior')
+    page.locator('#student-group').fill('1.º DAM')
+    page.locator('#start-form button').click()
+    page.locator('#q1-0').select_option('Entidad')
+    old_save = page.evaluate('localStorage.getItem("protocolo-er-v1")')
+    page.goto(URL)
+    assert page.locator('.legacy-notice').is_visible()
+    page.locator('.legacy-notice a').click()
+    page.locator('#resume-button').click()
+    assert page.locator('#q1-0').input_value() == 'Entidad'
+    assert page.evaluate('localStorage.getItem("protocolo-er-v1")') == old_save
+    print('OK: la edición anterior conserva sus partidas y es accesible desde la nueva.')
     browser.close()

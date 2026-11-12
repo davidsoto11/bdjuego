@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111326">
+  <meta name="description" content="Escapa de un laboratorio de datos resolviendo 20 retos de modelo entidad–relación. Consigue tu informe PDF para Moodle.">
+  <title>Protocolo E·R — El escape room de los datos</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="../vendor/jspdf.umd.min.js"></script>
+  <script defer src="content.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Protocolo E R, inicio"><span class="brand-icon" aria-hidden="true">◇</span> protocolo<span class="brand-er">e·r</span></a>
+    <span class="header-subtitle">Un escape room de bases de datos</span>
+    <button class="button ghost small" id="help-button" type="button"><span aria-hidden="true">ⓘ</span> Cómo se juega</button>
+  </header>
+  <main id="main" tabindex="-1"></main>
+  <footer class="footer"><span>Diseña. Conecta. Escapa.</span><span>Basado en el Tema 2 · Modelo Entidad–Relación</span><span class="local-label"><i aria-hidden="true"></i> Tus datos se quedan en este navegador</span></footer>
+  <dialog id="help-dialog" aria-labelledby="help-title">
+    <button class="dialog-close" aria-label="Cerrar ayuda" type="button">✕</button>
+    <span class="eyebrow">Manual de la misión</span><h2 id="help-title">Tu ingenio es la llave.</h2>
+    <ol class="help-list"><li>Escribe tu nombre y grupo para identificar tu informe.</li><li>Recorre cinco salas en orden. Cada sala tiene cuatro pruebas.</li><li>Cada acierto vale <strong>0,5 puntos</strong>. Si pides pista, ese acierto vale <strong>0,25</strong>. Los errores valen 0; no restan.</li><li>Al comprobar una sala, sus respuestas quedan cerradas. Podrás revisar la explicación y abrir la siguiente puerta, sea cual sea tu nota.</li><li>Al terminar, descarga el <strong>informe PDF</strong> y súbelo a la tarea de Moodle.</li></ol>
+    <p class="muted">Unos 25 minutos, sin cuenta atrás ni penalización por tiempo. La partida se guarda en este navegador si el almacenamiento está disponible. Puedes volver después.</p>
+    <button class="button primary dialog-close-action" type="button">Entendido, agente</button>
+  </dialog>
+  <noscript>Activa JavaScript en tu navegador para jugar a Protocolo E·R.</noscript>
+</body>
+</html>
