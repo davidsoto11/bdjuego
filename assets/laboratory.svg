@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="660" viewBox="0 0 800 660" fill="none">
+<defs>
+ <linearGradient id="floor" x1="170" y1="260" x2="610" y2="620" gradientUnits="userSpaceOnUse"><stop stop-color="#3B325A"/><stop offset="1" stop-color="#191E38"/></linearGradient>
+ <linearGradient id="left" x1="90" y1="190" x2="410" y2="450" gradientUnits="userSpaceOnUse"><stop stop-color="#34304F"/><stop offset="1" stop-color="#25243E"/></linearGradient>
+ <linearGradient id="right" x1="400" y1="170" x2="700" y2="350" gradientUnits="userSpaceOnUse"><stop stop-color="#27283F"/><stop offset="1" stop-color="#171F33"/></linearGradient>
+ <linearGradient id="door" x1="545" y1="170" x2="545" y2="350"><stop stop-color="#8070D2"/><stop offset="1" stop-color="#524384"/></linearGradient>
+ <radialGradient id="halo"><stop stop-color="#8271D9" stop-opacity=".27"/><stop offset="1" stop-color="#8271D9" stop-opacity="0"/></radialGradient>
+ <filter id="glow"><feGaussianBlur stdDeviation="5"/></filter>
+</defs>
+<ellipse cx="418" cy="400" rx="375" ry="250" fill="url(#halo)"/>
+<path d="m75 405 330-190 330 190-330 191Z" fill="#101222"/><path d="m75 390 330-190 330 190-330 191Z" fill="url(#floor)" stroke="#595078"/>
+<path d="M75 390V155L405 345v236Z" fill="url(#left)"/>
+<path d="m405 345 330-190v235L405 581Z" fill="url(#right)"/>
+<path d="m75 155 330-84 330 84-330 190Z" fill="#111326" opacity=".1"/>
+<path d="M75 155 405 345l330-190M405 345v236" stroke="#75649F" stroke-width="2"/>
+<path d="m95 380 310 178 310-178" stroke="#A38CE6" stroke-width="3"/><path d="m95 380 310 178 310-178" stroke="#B19AF6" stroke-width="7" opacity=".3" filter="url(#glow)"/>
+<g stroke="#8271AA" opacity=".17"><path d="m140 353 330 190m-265-228 330 190m-265-227 330 190m-265-228 330 190M140 429l330-190M205 467l330-190M270 505l330-190M335 543l330-190"/></g>
+<!-- Entity relationship board -->
+<path d="m115 204 205 118v125L115 329Z" fill="#151B30" stroke="#7E71AE" stroke-width="3"/>
+<g stroke="#9F8BE1" stroke-width="2"><path d="m132 238 50 29v28l-50-29Z" fill="#34334F"/><path d="m253 308 50 29v28l-50-29Z" fill="#34334F"/><path d="m210 285 22 29-22 4-22-29Z" fill="#7761BB"/><path d="m182 281 13 8m37 21 21 12"/><path d="m155 252 13-16m111 85 8-21"/></g>
+<g fill="#89D9D0"><ellipse cx="173" cy="231" rx="15" ry="8" transform="rotate(30 173 231)"/><ellipse cx="289" cy="294" rx="15" ry="8" transform="rotate(30 289 294)"/></g>
+<g fill="#B8A7F0" font-family="monospace" font-size="8" transform="matrix(1 .577 0 1 0 0)"><text x="137" y="172">ENTIDAD</text><text x="258" y="172">ENTIDAD</text><text x="139" y="227">MODELO E · R</text></g>
+<!-- Exit door -->
+<path d="m525 292 108-63v-98l-108 63Z" fill="#11172B" stroke="#8174BC" stroke-width="3"/>
+<path d="m535 285 88-51v-92l-88 51Z" fill="url(#door)"/>
+<path d="m540 279 78-45v-85l-78 45Z" stroke="#A795E4"/>
+<path d="m575 194 11-6v19l-11 6Z" fill="#C8B5FF"/><path d="m577 193v-7c0-9 7-13 7-4v7" stroke="#D7C5FF" stroke-width="3"/>
+<path d="m547 166 64-37v-17l-64 37Z" fill="#233F41"/><text fill="#8AE4CF" font-family="monospace" font-size="10" transform="matrix(1 -.577 0 1 554 155)">SALIDA</text>
+<path d="m640 218 20-12v-32l-20 12Z" fill="#354151"/><circle cx="649" cy="189" r="3" fill="#F4B58B"/>
+<!-- Desk -->
+<path d="m226 400 144-83 139 81-144 83Z" fill="#60547D" stroke="#9885BB"/>
+<path d="m226 400 139 81v17l-139-80Z" fill="#3F3759"/><path d="m365 481 144-83v17l-144 83Z" fill="#322D48"/>
+<path d="M243 425v64l12 7v-64m233-19v63l-12 7v-63M352 491v62l13 8v-63" fill="#25263E" stroke="#5E527A"/>
+<!-- Workstation -->
+<path d="m315 363 18-10 39 22-18 11Z" fill="#292C48"/><path d="M344 359v-30l12 6v30" stroke="#6D638C" stroke-width="5"/>
+<path d="m292 284 105 60v-78l-105-60Z" fill="#111C31" stroke="#8B7BB6" stroke-width="4"/>
+<path d="m303 279 83 48v-55l-83-48Z" fill="#21334A"/>
+<g stroke="#80D7CA" stroke-width="3"><path d="m312 244 48 28m-48-17 35 20m-35-9 57 33"/><path d="m312 277 24 14" stroke="#B7A0FF"/></g>
+<path d="m366 406 58-34 45 26-58 34Z" fill="#292C47" stroke="#8A79AB"/><g stroke="#8775A6"><path d="m379 404 40-23m-29 29 40-23m-28 30 39-23"/></g>
+<path d="m262 391 25-14 17 10-25 15Z" fill="#B7A0F1"/>
+<!-- Server rack -->
+<path d="m582 415 57-33V274l-57 33Z" fill="#242B42" stroke="#646082"/><path d="m552 398 30 17V307l-30-17Z" fill="#393750" stroke="#646082"/><path d="m552 290 57-33 30 17-57 33Z" fill="#49415E"/>
+<g stroke="#101929" stroke-width="8"><path d="m590 323 41-24m-41 44 41-24m-41 44 41-24m-41 44 41-24"/></g><g fill="#7BDBCA"><circle cx="624" cy="305" r="2"/><circle cx="624" cy="325" r="2"/><circle cx="624" cy="345" r="2"/><circle cx="624" cy="365" r="2"/></g>
+<!-- Scattered data -->
+<path d="m174 434 43 25-31 18-43-25Z" fill="#C5B8DA"/><path d="m161 451 24 14m-13-19 24 14" stroke="#827591" stroke-width="2"/>
+<path d="m458 496 24-14 24 14-24 14Z" fill="#F6B68D"/><path d="m482 482 24 14v25l-24-14Z" fill="#B87570"/><path d="m458 496 24 14v25l-24-14Z" fill="#CF8A7F"/>
+<circle cx="391" cy="145" r="4" fill="#C1A7FF"/><circle cx="670" cy="440" r="3" fill="#89D9D0"/><circle cx="124" cy="126" r="2" fill="#F6B68D"/>
+</svg>
