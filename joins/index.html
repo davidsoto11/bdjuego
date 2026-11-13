@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111326" />
+    <meta
+      name="description"
+      content="Cinco minijuegos de SQL JOIN con la base academia: escribe y ejecuta consultas, rescata filas y descarga tu informe PDF para Moodle."
+    />
+    <title>Protocolo JOIN — Laboratorio SQL</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../styles.css?v=3" />
+    <link rel="stylesheet" href="joins.css?v=1" />
+    <script defer src="../vendor/jspdf.umd.min.js"></script>
+    <script defer src="data.js"></script>
+    <script defer src="content.js"></script>
+    <script defer src="sql-ui.js"></script>
+    <script defer src="../app.js?v=3"></script>
+  </head>
+  <body class="sql-game">
+    <a class="skip-link" href="#main">Saltar al contenido</a>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Protocolo JOIN, inicio"
+        ><span class="brand-icon" aria-hidden="true">⋈</span> protocolo<span
+          class="brand-er"
+          >join</span
+        ></a
+      ><span class="header-subtitle">El laboratorio de consultas SQL</span
+      ><button class="button ghost small" id="help-button" type="button">
+        ⓘ Cómo se juega
+      </button>
+    </header>
+    <main id="main" tabindex="-1"></main>
+    <footer class="footer">
+      <span>Relaciona. Comprueba. Rescata.</span
+      ><span>Apuntes JOIN · Datos de la academia</span
+      ><span class="local-label"
+        ><i aria-hidden="true"></i> Consultas y datos en tu navegador</span
+      >
+    </footer>
+    <dialog id="help-dialog" aria-labelledby="help-title">
+      <button class="dialog-close" aria-label="Cerrar ayuda" type="button">
+        ✕</button
+      ><span class="eyebrow">Manual de la academia</span>
+      <h2 id="help-title">Una consulta. Las filas correctas.</h2>
+      <ol class="help-list">
+        <li>
+          Escribe tu nombre y grupo. Cada juego conserva su propia partida y su
+          nota.
+        </li>
+        <li>
+          Completa cinco minijuegos de cuatro retos: diez consultas SQL y diez
+          pruebas de interpretación.
+        </li>
+        <li>
+          Consulta los registros en el explorador. En los editores,
+          <strong>Ejecutar consulta</strong> muestra las filas, sin corregir ni
+          gastar un intento.
+        </li>
+        <li>
+          Al <strong>comprobar la sala</strong> se ejecutan y corrigen tus
+          consultas y se cierran todas las respuestas. Las consultas con error
+          puntúan 0. Si falla la carga del motor, podrás reintentar la
+          corrección.
+        </li>
+        <li>
+          Cada acierto vale <strong>0,5</strong>, o
+          <strong>0,25 con pista</strong>. Una asociación exige acertar todas
+          las filas. Los errores no restan.
+        </li>
+        <li>
+          Las consultas se comparan por los valores de sus resultados,
+          conservando duplicados y NULL. Las columnas deben ir en el orden
+          pedido; los alias pueden cambiar. Solo se exige el orden de filas
+          cuando lo indica el reto.
+        </li>
+        <li>
+          Al terminar, descarga el
+          <strong>PDF con nota, consultas y resultados</strong> y entrégalo en
+          Moodle.
+        </li>
+      </ol>
+      <p class="muted">
+        Unos 50 minutos, sin cuenta atrás. El editor usa SQLite localmente para
+        la sintaxis común de los apuntes. Los ejercicios explican la simulación
+        de FULL en MariaDB; el laboratorio no se conecta a una base de datos
+        real.
+      </p>
+      <button class="button primary dialog-close-action" type="button">
+        Entendido, vamos a unir
+      </button>
+    </dialog>
+    <noscript
+      >Activa JavaScript para jugar al laboratorio de SQL JOIN.</noscript
+    >
+  </body>
+</html>

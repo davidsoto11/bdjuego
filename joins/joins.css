@@ -1,0 +1,230 @@
+.sql-game {
+  --purple: #80d9cb;
+  --orange: #ffb587;
+}
+.sql-game .hero h1 {
+  font-size: clamp(42px, 4.8vw, 69px);
+}
+.sql-game .hero-art {
+  margin-left: -25px;
+}
+.data-explorer {
+  margin-top: 23px;
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+}
+.data-explorer > summary {
+  cursor: pointer;
+  font: 500 16px var(--heading);
+  line-height: 1.7;
+}
+.data-explorer > summary span {
+  display: block;
+  font: 11px var(--body);
+  color: var(--muted);
+  margin: 3px 0 14px;
+}
+.table-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 18px 0 13px;
+}
+.table-tab {
+  border: 1px solid #454b65;
+  border-radius: 7px;
+  color: #c5c9df;
+  background: #111529;
+  padding: 8px 12px;
+  font: 12px var(--heading);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 38px;
+}
+.table-tab span {
+  font: 10px var(--body);
+  color: #9dabc2;
+}
+.table-tab.selected {
+  border-color: var(--mint);
+  color: var(--mint);
+  background: #80d9cb0d;
+}
+.sql-table-scroll {
+  overflow: auto;
+  max-width: 100%;
+  border: 1px solid #39415a;
+  border-radius: 9px;
+  background: #101629;
+}
+.sql-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font: 12px var(--body);
+  white-space: nowrap;
+}
+.sql-table caption {
+  text-align: left;
+  font-size: 11px;
+  padding: 12px 14px;
+  color: #a9b5d1;
+  caption-side: top;
+  background: #1b243a;
+}
+.sql-table th {
+  color: #8de1d4;
+  font: 500 12px var(--heading);
+  background: #182137;
+}
+.sql-table th,
+.sql-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #2d344b;
+}
+.sql-table tr:last-child td {
+  border-bottom: 0;
+}
+.sql-table tbody tr:nth-child(even) {
+  background: #ffffff03;
+}
+.null-value {
+  font: italic 11px monospace;
+  color: #ffb587;
+  background: #ffb5870b;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.sql-engine-note {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.9;
+  margin: 15px 0 10px;
+}
+.sql-download {
+  font-size: 11px;
+  color: var(--mint);
+  text-underline-offset: 4px;
+}
+.sql-editor {
+  min-width: 0;
+}
+.sql-editor > label {
+  display: block;
+  font: 12px var(--heading);
+  color: var(--mint);
+  margin-bottom: 9px;
+}
+.sql-editor textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  resize: vertical;
+  min-height: 175px;
+  border: 1px solid #52617a;
+  border-radius: 9px;
+  background: #0b1222;
+  color: #d2f4eb;
+  padding: 16px;
+  font:
+    13px/1.9 ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace;
+  tab-size: 2;
+}
+.sql-editor textarea:disabled {
+  opacity: 1;
+  color: #c5d8e1;
+  border-color: #3a465c;
+}
+.sql-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 12px 0 5px;
+}
+.sql-editor-actions > span {
+  font-size: 10px;
+  color: var(--muted);
+}
+.sql-output {
+  margin-top: 14px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.sql-error {
+  color: #ffc0c6;
+  background: #ffc0c60b;
+  border: 1px solid #ffc0c640;
+  border-radius: 7px;
+  padding: 12px;
+}
+.sql-empty {
+  font-size: 12px;
+  padding: 14px;
+  color: var(--muted);
+  margin: 0;
+}
+.sql-reference {
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--mint);
+}
+.sql-reference summary {
+  cursor: pointer;
+}
+.sql-reference pre {
+  margin-top: 13px;
+  padding: 15px;
+  background: #0b1222;
+  color: #c9e5e5;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font:
+    12px/1.8 ui-monospace,
+    monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.sql-game .feedback p {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.sql-game #room-form[inert] {
+  opacity: 0.6;
+}
+.sql-game .form-error {
+  white-space: pre-line;
+}
+@media (max-width: 560px) {
+  .sql-game .hero h1 {
+    font-size: 51px;
+  }
+  .sql-game .hero-art {
+    margin: -5px -10px -25px;
+  }
+  .sql-editor textarea {
+    padding: 12px;
+    font-size: 12px;
+  }
+  .sql-editor-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .table-tab {
+    padding: 7px 9px;
+  }
+  .sql-table {
+    font-size: 11px;
+  }
+  .sql-table th,
+  .sql-table td {
+    padding: 9px 11px;
+  }
+  .data-explorer > summary {
+    font-size: 14px;
+  }
+}

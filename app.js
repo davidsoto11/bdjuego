@@ -1,4 +1,15 @@
-const STORAGE_KEY = 'protocolo-er-v2';
+const GAME = Object.assign({
+  id: 'er', storageKey: 'protocolo-er-v2', version: 2, title: 'Protocolo E.R',
+  edition: 'Edición 2 · Interpreta los planos', minutes: 35,
+  heading: 'Los datos están<br>encerrados.<br><span>Tú tienes la llave.</span>',
+  description: 'Un laboratorio en silencio. Cinco puertas bloqueadas. Y un único camino de salida: dominar el modelo Entidad–Relación.',
+  art: 'assets/laboratory.svg', artAlt: 'Laboratorio isométrico con un diagrama entidad–relación, un ordenador y una puerta de salida bloqueada',
+  learning: 'Resuelve diagramas, identifica atributos y descifra cardinalidades. Hay pistas si te atascas y explicaciones en cada sala.',
+  caseTag: 'Lectura de diagramas · Nivel intermedio',
+  legend: 'Notación: cada (mín,máx) se lee junto a su entidad de origen. Las etiquetas A, B y C son incógnitas, no cardinalidades resueltas.',
+  reportSubtitle: 'Informe individual - Edición 2: interpretación de planos', reportTopic: 'Tema 2 - Diseño conceptual: Modelo Entidad-Relación', filePrefix: 'Informe_ER',
+}, typeof ACTIVITY === 'undefined' ? {} : ACTIVITY);
+const STORAGE_KEY = GAME.storageKey;
 const main = document.querySelector('#main');
 const helpDialog = document.querySelector('#help-dialog');
 let state = null;
@@ -19,13 +30,14 @@ const duration = () => `${Math.floor(elapsed() / 60)} min ${elapsed() % 60} s`;
 const dateLabel = (timestamp) => new Date(timestamp).toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Madrid' });
 
 function validAnswer(question, answer) {
+  if (question.type === 'sql') return window.SQLPractice.validAnswer(answer);
   return question.type === 'match'
     ? Array.isArray(answer) && answer.length === question.rows.length && answer.every((item) => item === '' || question.options.includes(item))
     : question.options.includes(answer);
 }
 
 function validSave(saved) {
-  if (!saved || saved.version !== 2 || typeof saved.id !== 'string' || !saved.id || saved.id.length > 100 ||
+  if (!saved || saved.version !== GAME.version || typeof saved.id !== 'string' || !saved.id || saved.id.length > 100 ||
       !saved.student || typeof saved.student.name !== 'string' || !saved.student.name.trim() || saved.student.name.length > 90 ||
       typeof saved.student.group !== 'string' || !saved.student.group.trim() || saved.student.group.length > 60 ||
       !Number.isFinite(saved.startedAt) || saved.startedAt <= 0 || saved.startedAt > Date.now() ||
@@ -45,7 +57,7 @@ function validSave(saved) {
 }
 
 try {
-  hasLegacySave = !!localStorage.getItem('protocolo-er-v1');
+  hasLegacySave = GAME.id === 'er' && !!localStorage.getItem('protocolo-er-v1');
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) {
     const saved = JSON.parse(raw);
@@ -77,16 +89,16 @@ function focusMain() {
 
 function renderLanding() {
   clearInterval(timer);
-  main.innerHTML = `<div class="landing">
+  main.innerHTML = `<div class="landing"><nav class="activity-nav" aria-label="Juegos de bases de datos"><a href="${GAME.id === 'joins' ? '../' : './'}" ${GAME.id === 'er' ? 'aria-current="page"' : ''}><span>◇</span> Modelo Entidad–Relación</a><a href="${GAME.id === 'joins' ? './' : 'joins/'}" ${GAME.id === 'joins' ? 'aria-current="page"' : ''}><span>⋈</span> Laboratorio SQL JOIN <small>Nuevo</small></a></nav>
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <div class="mission-label"><span class="status-dot"></span> Edición 2 · Interpreta los planos</div>
-        <h1 id="hero-title">Los datos están<br>encerrados.<br><span>Tú tienes la llave.</span></h1>
-        <p class="hero-description">Un laboratorio en silencio. Cinco puertas bloqueadas. Y un único camino de salida: dominar el modelo Entidad–Relación.</p>
+        <div class="mission-label"><span class="status-dot"></span> ${GAME.edition}</div>
+        <h1 id="hero-title">${GAME.heading}</h1>
+        <p class="hero-description">${GAME.description}</p>
         <div class="hero-actions"><button class="button primary" id="enter-button" type="button">${state ? 'Retomar la misión' : 'Acepto la misión'} <span class="arrow" aria-hidden="true">↗</span></button><span class="muted">Sin registro.<br>Solo tú y tu ingenio.</span></div>
-        <div class="hero-meta"><span><b aria-hidden="true">◷</b> ≈ 35 minutos</span><span><b aria-hidden="true">◇</b> 5 salas · 20 pruebas</span><span><b aria-hidden="true">↓</b> Informe PDF</span></div>
+        <div class="hero-meta"><span><b aria-hidden="true">◷</b> ≈ ${GAME.minutes} minutos</span><span><b aria-hidden="true">◇</b> 5 salas · 20 pruebas</span><span><b aria-hidden="true">↓</b> Informe PDF</span></div>
       </div>
-      <div class="hero-art"><img src="assets/laboratory.svg" alt="Laboratorio isométrico con un diagrama entidad–relación, un ordenador y una puerta de salida bloqueada" width="800" height="660"><div class="floating-label label-a"><span class="tiny-icon" aria-hidden="true">⌘</span><span><strong>Sistema bloqueado</strong>Esperando a un agente…</span></div><div class="floating-label label-b"><span class="tiny-icon" aria-hidden="true">◇</span><span><strong>Protocolo de salida</strong>Reconstruye el modelo E·R</span></div></div>
+      <div class="hero-art"><img src="${GAME.art}" alt="${GAME.artAlt}" width="800" height="660"><div class="floating-label label-a"><span class="tiny-icon" aria-hidden="true">⌘</span><span><strong>Sistema bloqueado</strong>Esperando a un agente…</span></div><div class="floating-label label-b"><span class="tiny-icon" aria-hidden="true">◇</span><span><strong>Protocolo de salida</strong>${GAME.id === 'joins' ? 'Reconecta la academia' : 'Reconstruye el modelo E·R'}</span></div></div>
     </section>
     ${storageNotice()}
     ${hasLegacySave ? '<p class="legacy-notice">Tienes una partida de la edición anterior. <a href="version-1/">Retómala o descarga su informe aquí</a>. Esta edición conserva ese intento sin mezclar las notas.</p>' : ''}
@@ -94,7 +106,7 @@ function renderLanding() {
     ${state ? `<section class="resume-panel" id="resume-panel"><div><strong>Tu misión sigue aquí, ${escapeHTML(state.student.name)}.</strong><p>${state.finishedAt ? 'Has completado el recorrido. Tu informe está disponible.' : `${state.submitted.length} de 5 salas completadas. Puedes continuar donde lo dejaste.`}</p></div><div class="resume-actions"><button class="button mint" id="resume-button">${state.finishedAt ? 'Ver mi informe' : 'Continuar'}</button><button class="button ghost small" id="restart-button">Nueva partida</button></div></section>` : ''}
     <section class="start-panel" id="start-panel" hidden aria-labelledby="start-title"><h2 id="start-title">Identifícate, agente.</h2><p class="muted">Estos datos aparecerán en el informe que entregarás en Moodle.</p><form id="start-form" class="start-form"><div class="field"><label for="student-name">Nombre y apellidos</label><input id="student-name" name="name" autocomplete="name" placeholder="Tu nombre completo" maxlength="90" required></div><div class="field"><label for="student-group">Curso y grupo</label><input id="student-group" name="group" placeholder="Ej. 1.º DAM · Grupo A" maxlength="60" required></div><button class="button primary" type="submit">Entrar al laboratorio <span aria-hidden="true">↗</span></button></form><p class="form-note">20 pruebas × 0,5 puntos. Cada acierto con pista vale 0,25. En las asociaciones deben acertarse todas las filas. Sin límite de tiempo.</p></section>
     <section class="route-section" aria-labelledby="route-title"><div class="section-heading"><h2 id="route-title">Cinco salas. Una salida.</h2><span>Cada puerta te acerca al núcleo.</span></div><div class="room-route">${ROOMS.map((room, i) => `<article class="route-card" style="--room-color:${room.color}"><div class="route-top"><span class="room-icon" aria-hidden="true">${room.icon}</span><span class="route-number">0${i + 1} / 05</span></div><h3>${room.name}</h3><p>${room.topic}</p></article>`).join('')}</div></section>
-    <section class="mission-bottom" aria-label="Información de la actividad"><div class="brief-block"><span class="brief-icon" aria-hidden="true">✧</span><div><h3>Aprende mientras encuentras la salida</h3><p>Resuelve diagramas, identifica atributos y descifra cardinalidades. Hay pistas si te atascas y explicaciones en cada sala.</p></div></div><div class="brief-block"><span class="brief-icon" aria-hidden="true">▤</span><div><h3>Tu misión termina con una entrega</h3><p>Al salir, recibirás un PDF con tu nota y el detalle de tus respuestas. Descárgalo y súbelo a la tarea de Moodle.</p></div></div></section>
+    <section class="mission-bottom" aria-label="Información de la actividad"><div class="brief-block"><span class="brief-icon" aria-hidden="true">✧</span><div><h3>Aprende mientras encuentras la salida</h3><p>${GAME.learning}</p></div></div><div class="brief-block"><span class="brief-icon" aria-hidden="true">▤</span><div><h3>Tu misión termina con una entrega</h3><p>Al salir, recibirás un PDF con tu nota y el detalle de tus respuestas. Descárgalo y súbelo a la tarea de Moodle.</p></div></div></section>
   </div>`;
   document.querySelector('#enter-button').addEventListener('click', () => state ? resume() : showStart());
   document.querySelector('#resume-button')?.addEventListener('click', resume);
@@ -121,7 +133,7 @@ function startGame(event) {
       return;
     }
   }
-  state = { version: 2, id: crypto.randomUUID(), student: { name: nameInput.value.trim(), group: groupInput.value.trim() }, startedAt: Date.now(), finishedAt: null, room: 0, submitted: [], answers: {}, hints: {} };
+  state = { version: GAME.version, id: crypto.randomUUID(), student: { name: nameInput.value.trim(), group: groupInput.value.trim() }, startedAt: Date.now(), finishedAt: null, room: 0, submitted: [], answers: {}, hints: {} };
   damagedSave = false;
   save();
   renderRoom();
@@ -152,7 +164,7 @@ function confirmRestart() {
 }
 
 function diagram(room) {
-  return `<section class="case-file" aria-label="Planos y requisitos de la sala"><div class="case-header"><h2>Expediente de la sala</h2><span>Lectura de diagramas · Nivel intermedio</span></div><p class="case-context">${escapeHTML(room.context)}</p>${room.diagrams.map((plan, index) => `<figure class="plan-figure"><figcaption><strong>${escapeHTML(plan.title)}</strong><button class="button ghost small" data-open-plan="${index}" type="button" aria-label="Ampliar plano ${escapeHTML(plan.title)}">⛶ Ampliar plano</button></figcaption><img class="plan-image" src="${plan.src}" alt="${escapeHTML(plan.description)}" width="1100" loading="eager"><details class="plan-description"><summary>Leer descripción del plano</summary><p>${escapeHTML(plan.description)}</p></details></figure>`).join('')}<p class="plan-legend">Notación: cada (mín,máx) se lee junto a su entidad de origen. Las etiquetas A, B y C son incógnitas, no cardinalidades resueltas.</p></section>`;
+  return `<section class="case-file" aria-label="Planos y requisitos de la sala"><div class="case-header"><h2>Expediente de la sala</h2><span>${GAME.caseTag}</span></div><p class="case-context">${escapeHTML(room.context)}</p>${room.diagrams.map((plan, index) => `<figure class="plan-figure"><figcaption><strong>${escapeHTML(plan.title)}</strong><button class="button ghost small" data-open-plan="${index}" type="button" aria-label="Ampliar plano ${escapeHTML(plan.title)}">⛶ Ampliar plano</button></figcaption><img class="plan-image" src="${plan.src}" alt="${escapeHTML(plan.description)}" width="1100" loading="eager"><details class="plan-description"><summary>Leer descripción del plano</summary><p>${escapeHTML(plan.description)}</p></details></figure>`).join('')}<p class="plan-legend">${GAME.legend}</p>${window.SQLPractice ? window.SQLPractice.caseHTML(room) : ''}</section>`;
 }
 
 function openPlan(room, index) {
@@ -172,7 +184,7 @@ function questionHTML(question, index, locked = false) {
   const usedHint = !!state.hints[question.id];
   const points = pointsFor(question);
   const correct = questionScore(question, answer, false) > 0;
-  const inputHTML = question.type === 'match'
+  const inputHTML = question.type === 'sql' ? window.SQLPractice.questionHTML(question, answer, locked) : question.type === 'match'
     ? `<div class="matching">${question.rows.map((row, i) => `<div class="match-row"><label for="${question.id}-${i}">${escapeHTML(row)}</label><select id="${question.id}-${i}" data-question="${question.id}" data-row="${i}" ${locked ? 'disabled' : ''}><option value="">Selecciona una respuesta</option>${question.options.map((option) => `<option value="${escapeHTML(option)}" ${answer?.[i] === option ? 'selected' : ''}>${escapeHTML(option)}</option>`).join('')}</select></div>`).join('')}</div>`
     : `<fieldset class="choices" ${locked ? 'disabled' : ''}><legend>${escapeHTML(question.title)}</legend>${question.options.map((option) => `<label class="choice ${locked ? (option === question.answer ? 'correct' : 'incorrect') : ''}"><input type="radio" name="${question.id}" data-question="${question.id}" value="${escapeHTML(option)}" ${answer === option ? 'checked' : ''}><span>${escapeHTML(option)}</span></label>`).join('')}</fieldset>`;
   return `<article class="question-card" id="card-${question.id}"><div class="question-title"><span class="question-num">${String(index + 1).padStart(2, '0')}</span><h2>${question.title}</h2><span class="question-value">${locked ? `${number(points)} / 0,5` : '0,5 puntos'}</span></div><p class="question-prompt">${question.prompt}</p>${inputHTML}
@@ -198,11 +210,13 @@ function renderRoom() {
     ${locked ? `<section class="room-unlocked" id="unlocked" tabindex="-1"><div class="unlocked-header"><span class="earned-key">${room.key}</span><div><h2>Puerta abierta. Llave recuperada.</h2><p>Has conseguido ${number(roomScore(room))} de 2 puntos en esta sala. Revisa las explicaciones antes de continuar.</p></div></div><button id="next-button" class="button mint" type="button">${state.room === 4 ? 'Activar la salida y ver mi nota' : 'Entrar en la siguiente sala'} <span aria-hidden="true">↗</span></button></section>` : ''}
     </section></div></div>`;
   document.querySelectorAll('[data-open-plan]').forEach((button) => button.onclick = () => openPlan(room, Number(button.dataset.openPlan)));
+  window.SQLPractice?.mountRoom(room, locked);
   document.querySelector('#home-button').onclick = () => { save(); renderLanding(); focusMain(); };
   document.querySelector('#room-form').addEventListener('change', (event) => {
     const input = event.target;
     if (locked || !input.dataset.question) return;
     const question = room.questions.find((q) => q.id === input.dataset.question);
+    if (question.type === 'sql') return;
     if (question.type === 'match') {
       if (!Array.isArray(state.answers[question.id])) state.answers[question.id] = question.rows.map(() => '');
       state.answers[question.id][Number(input.dataset.row)] = input.value;
@@ -225,10 +239,11 @@ function renderRoom() {
 }
 
 function answerComplete(question, answer) {
+  if (question.type === 'sql') return validAnswer(question, answer) && !!answer.sql.trim();
   return validAnswer(question, answer) && (question.type !== 'match' || answer.every(Boolean));
 }
 
-function submitRoom(event) {
+async function submitRoom(event) {
   event.preventDefault();
   const room = ROOMS[state.room];
   if (state.submitted.includes(room.id)) return;
@@ -237,8 +252,17 @@ function submitRoom(event) {
     document.querySelector('#room-error').textContent = 'Responde todas las pruebas de la sala. En las asociaciones, elige una respuesta en cada fila.';
     const card = document.querySelector(`#card-${missing.id}`);
     card.scrollIntoView({ behavior: 'instant', block: 'center' });
-    card.querySelector('input, select').focus({ preventScroll: true });
+    card.querySelector('input, select, textarea').focus({ preventScroll: true });
     return;
+  }
+  if (window.SQLPractice) {
+    const form = document.querySelector('#room-form');
+    const errorDisplay = document.querySelector('#room-error');
+    form.inert = true;
+    errorDisplay.textContent = 'Comprobando las consultas con los datos de academia…';
+    try { await window.SQLPractice.gradeRoom(room); }
+    catch (error) { errorDisplay.textContent = error.message; return; }
+    finally { form.inert = false; }
   }
   state.submitted.push(room.id);
   save();
@@ -264,8 +288,8 @@ function renderResults() {
   clearInterval(timer);
   const grade = totalScore();
   const correctCount = questions.filter((q) => questionScore(q, state.answers[q.id], false) > 0).length;
-  main.innerHTML = `<div class="results"><section class="result-hero"><div class="escape-icon" aria-hidden="true">⌘</div><span class="eyebrow">Protocolo restaurado · Misión completada</span><h1>Has encontrado la salida.</h1><p>El laboratorio vuelve a estar conectado, ${escapeHTML(state.student.name)}. Tu recorrido ya tiene informe: descárgalo para entregar la actividad.</p><div class="result-keys" aria-label="Protocolo DATOS">${ROOMS.map((room) => `<span class="key-slot found">${room.key}</span>`).join('')}</div></section>
-    ${storageNotice()}<div class="result-grid"><section class="grade-card" aria-labelledby="grade-title"><span class="grade-label" id="grade-title">Tu nota final</span><div class="grade-number">${number(grade)}<span> / 10</span></div><p class="grade-message">${grade >= 9 ? 'Dominio del modelo. Gran trabajo, agente.' : grade >= 5 ? 'Misión superada. Sigue conectando ideas.' : 'Recorrido completado. Revisa y refuerza el modelo.'}</p><div class="grade-details"><div><span>Agente</span><strong>${escapeHTML(state.student.name)}</strong></div><div><span>Curso y grupo</span><strong>${escapeHTML(state.student.group)}</strong></div><div><span>Aciertos</span><strong>${correctCount} de 20</strong></div><div><span>Pistas utilizadas</span><strong>${hintsCount()}</strong></div><div><span>Tiempo de misión</span><strong>${duration()}</strong></div></div></section>
+  main.innerHTML = `<div class="results"><section class="result-hero"><div class="escape-icon" aria-hidden="true">⌘</div><span class="eyebrow">Protocolo restaurado · Misión completada</span><h1>Has encontrado la salida.</h1><p>El laboratorio vuelve a estar conectado, ${escapeHTML(state.student.name)}. Tu recorrido ya tiene informe: descárgalo para entregar la actividad.</p><div class="result-keys" aria-label="Protocolo de salida">${ROOMS.map((room) => `<span class="key-slot found">${room.key}</span>`).join('')}</div></section>
+    ${storageNotice()}<div class="result-grid"><section class="grade-card" aria-labelledby="grade-title"><span class="grade-label" id="grade-title">Tu nota final</span><div class="grade-number">${number(grade)}<span> / 10</span></div><p class="grade-message">${grade >= 9 ? 'Gran trabajo, agente. Misión dominada.' : grade >= 5 ? 'Misión superada. Sigue conectando ideas.' : 'Recorrido completado. Revisa las explicaciones.'}</p><div class="grade-details"><div><span>Agente</span><strong>${escapeHTML(state.student.name)}</strong></div><div><span>Curso y grupo</span><strong>${escapeHTML(state.student.group)}</strong></div><div><span>Aciertos</span><strong>${correctCount} de 20</strong></div><div><span>Pistas utilizadas</span><strong>${hintsCount()}</strong></div><div><span>Tiempo de misión</span><strong>${duration()}</strong></div></div></section>
     <section class="breakdown"><h2>Así has conectado las piezas</h2>${ROOMS.map((room) => `<div class="breakdown-row" style="--room-color:${room.color}"><div class="breakdown-label"><span>${room.name}</span><strong>${number(roomScore(room))} / 2</strong></div><div class="progress-track" role="meter" aria-label="Puntos en ${room.name}" aria-valuemin="0" aria-valuemax="2" aria-valuenow="${roomScore(room)}"><span style="width:${roomScore(room) * 50}%"></span></div></div>`).join('')}<p class="form-note">Acierto: 0,5 puntos. Acierto con pista: 0,25. Error: 0. Las asociaciones puntúan si todas sus filas son correctas.</p></section></div>
     <section class="download-panel"><div><h2>Tu última puerta está en Moodle.</h2><p>Descarga el PDF con tu nombre, nota, respuestas y correcciones. Después, adjúntalo en la tarea que te indique tu profesor y confirma la entrega.</p></div><button class="button primary" id="download-button" type="button">↓ Descargar informe PDF</button></section><p id="download-status" class="live-status" role="status" aria-live="polite"></p>
     <p class="result-footnote">Finalizada el ${dateLabel(state.finishedAt)} (hora de Madrid). Referencia de intento: ${escapeHTML(state.id)}. Conserva tu PDF antes de iniciar otra partida.</p>
@@ -284,7 +308,7 @@ async function downloadReport() {
   try {
     if (!window.jspdf?.jsPDF) throw new Error('PDF library unavailable');
     const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', compress: true });
-    doc.setProperties({ title: `Informe Protocolo ER - ${state.student.name}`, subject: 'Resultados de la actividad Modelo Entidad-Relación', author: state.student.name });
+    doc.setProperties({ title: `Informe ${GAME.title} - ${state.student.name}`, subject: GAME.reportTopic, author: state.student.name });
     const pageWidth = 174;
     let y = 20;
     // shortcut: el informe usa Helvetica y caracteres latinos; incrustar una fuente Unicode si se necesitan otros alfabetos.
@@ -304,9 +328,9 @@ async function downloadReport() {
     };
     doc.setFillColor(29, 28, 53);
     doc.rect(0, 0, 210, 49, 'F');
-    write('PROTOCOLO E.R', 24, true, [211, 193, 255]);
-    write('Informe individual - Edición 2: interpretación de planos', 12, false, [239, 235, 255]);
-    write('Tema 2 - Diseño conceptual: Modelo Entidad-Relación', 10, false, [207, 202, 227]);
+    write(GAME.title.toUpperCase(), 24, true, [211, 193, 255]);
+    write(GAME.reportSubtitle, 12, false, [239, 235, 255]);
+    write(GAME.reportTopic, 10, false, [207, 202, 227]);
     y = 60;
     write(`Alumno/a: ${state.student.name}`, 12, true);
     write(`Curso y grupo: ${state.student.group}`);
@@ -355,7 +379,8 @@ async function downloadReport() {
         write(`${question.id.slice(1)}. ${question.title}`, 11, true);
         write(question.prompt, 9);
         const answer = state.answers[question.id];
-        write(`Respuesta del alumno: ${Array.isArray(answer) ? question.rows.map((row, i) => `${row}: ${answer[i]}`).join('; ') : answer}`, 9);
+        write(`Respuesta del alumno: ${Array.isArray(answer) ? question.rows.map((row, i) => `${row}: ${answer[i]}`).join('; ') : question.type === 'sql' ? answer.sql : answer}`, 9);
+        if (question.type === 'sql') write(window.SQLPractice.reportResult(answer), 8);
         write(`Respuesta correcta: ${solutionLabel(question)}`, 9);
         write(`Puntuación: ${number(pointsFor(question))} / 0,5 | Pista utilizada: ${state.hints[question.id] ? 'Sí' : 'No'}`, 9, true);
         if (state.hints[question.id]) write(`Pista: ${question.hint}`, 9);
@@ -369,10 +394,10 @@ async function downloadReport() {
       doc.setDrawColor(220, 215, 232);
       doc.line(18, 283, 192, 283);
       doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(115, 110, 130);
-      doc.text(`Protocolo E.R | ${state.id}`, 18, 289);
+      doc.text(`${GAME.title} | ${state.id}`, 18, 289);
       doc.text(`${page} / ${pages}`, 192, 289, { align: 'right' });
     }
-    const filename = `Informe_ER_${state.student.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '_').slice(0, 75)}_${state.id.slice(0, 8)}.pdf`;
+    const filename = `${GAME.filePrefix}_${state.student.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '_').slice(0, 75)}_${state.id.slice(0, 8)}.pdf`;
     await doc.save(filename, { returnPromise: true });
     status.textContent = 'Informe generado. Comprueba la carpeta de descargas y adjunta el PDF en Moodle.';
   } catch (error) {

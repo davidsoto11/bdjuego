@@ -1,4 +1,4 @@
-# Protocolo E·R
+# Juegos de bases de datos: Protocolo E·R y Protocolo JOIN
 
 Un escape room educativo de modelo Entidad–Relación: cinco salas, veinte pruebas y un informe PDF individual para entregar en Moodle.
 
@@ -7,6 +7,8 @@ La **edición 2** plantea casos de nivel intermedio: seis planos SVG completos, 
 ## Jugar
 
 Abre **https://davidsoto11.github.io/bdjuego/**. El alumno introduce nombre y grupo, resuelve las salas en orden, descarga su PDF al terminar y lo adjunta a la tarea de Moodle.
+
+Desde el selector del inicio también se accede al [laboratorio SQL JOIN](https://davidsoto11.github.io/bdjuego/joins/). Cada actividad conserva una partida y una nota independientes.
 
 Sin cuentas, backend, instalación ni servicios de pago. Los recursos y la generación del PDF se sirven desde el propio sitio. La partida se conserva en el almacenamiento local del navegador cuando está disponible; no se envían nombres ni respuestas a un servidor de la aplicación. No se sincroniza entre dispositivos. En un equipo compartido, empezar una nueva partida elimina el intento anterior del navegador, previa confirmación.
 
@@ -39,6 +41,28 @@ Las participaciones `(mín,máx)` se sitúan **junto a la entidad de origen**: i
 
 **Límite de evaluación:** el juego y la nota se calculan en el navegador. El PDF no está firmado y no verifica la identidad ni impide modificar resultados o consultar las soluciones del código público. Es una actividad didáctica y una evidencia de trabajo, no un sistema de examen inviolable. Para evaluación con garantías harían falta autenticación y corrección en servidor o un cuestionario de Moodle. El informe no se envía automáticamente a Moodle.
 
+## Laboratorio SQL JOIN
+
+Cinco minijuegos con **20 retos: 10 consultas ejecutables y 10 pruebas de interpretación**, basados en `JOIN unir tablas en SQL.pdf`, `apuntes_joins_sql.pdf` y el ejemplo de academia facilitado por el profesor. Los PDF se conservan localmente. Se utiliza el mismo sistema de notas y pistas del escape room, con duración orientativa de **50 minutos**.
+
+| Minijuego | Qué se practica |
+| --- | --- |
+| El emparejador | INNER, USING, NATURAL y conteos de INNER/LEFT/RIGHT/FULL/CROSS |
+| El rescate de filas | LEFT, encadenamiento y filtros en ON frente a WHERE |
+| Los registros fantasma | Antijoin, semijoin con EXISTS y trampas de NULL/NOT IN |
+| El espejo y el contador | SELF JOIN, mentores y COUNT en una unión externa |
+| El combinador final | UNION, simulación de FULL con UNION ALL y CROSS sobre niveles distintos |
+
+El explorador muestra los **33 registros originales**: 3 sedes, 6 profesores, 7 cursos, 7 alumnos y 10 matrículas. Incluye esquema ampliable, claves, referencias y columnas que admiten NULL. [joins/academia.sql](joins/academia.sql) contiene las tablas y los INSERT para una base vacía, sin ejecutar `DROP DATABASE`, `CREATE DATABASE` ni `USE`. `joins/data.js` conserva los mismos datos para el explorador y el motor.
+
+El editor ejecuta SQLite en memoria con **sql.js 1.16.0**, alojado en `vendor/sqljs/`. La sintaxis de los ejercicios es común a SQLite y MariaDB; el propio juego explica que este entorno no es un servidor MariaDB. La solución de referencia de FULL utiliza `LEFT JOIN`, `UNION ALL` y un antijoin compatible con MariaDB. La corrección por resultados puede aceptar también un `FULL JOIN` nativo de SQLite, porque no exige una estructura textual concreta.
+
+**Ejecutar consulta** enseña las filas y los errores, sin corregir. **Comprobar sala** vuelve a ejecutar los editores, compara sus resultados y cierra las cuatro respuestas. Se acepta SQL equivalente con alias diferentes. Importan el número y posición de las columnas, todos los valores, NULL y la multiplicidad de las filas. El orden de las filas solo se compara cuando lo exige el enunciado; no se analiza si el texto contiene `ORDER BY`. Una consulta sintácticamente correcta puede puntuar 0 si no devuelve el resultado pedido. Las consultas con error también puntúan 0 al corregir; un fallo al cargar el motor permite reintentar sin cerrar la sala.
+
+Cada ejecución tiene su propio Web Worker y copia de los datos, con `PRAGMA query_only=ON`, una sola sentencia SELECT/WITH, máximo de 12.000 caracteres de SQL, 200 filas, 30 columnas y 50.000 caracteres de texto en el resultado, y 1,5 segundos de ejecución tras cargar el motor. Las consultas se ejecutan fuera del hilo de interfaz y se termina el worker al finalizar. No hay conexión a una base real. El editor necesita un navegador con WebAssembly y Web Workers, y que se carguen los recursos estáticos del sitio.
+
+El PDF identifica **Protocolo JOIN** e incluye nombre, grupo, nota sobre 10, puntuación por minijuego, consultas escritas, resultados obtenidos o errores, soluciones, pistas y explicaciones. El guardado usa `protocolo-joins-v1` y no modifica los intentos ER (`protocolo-er-v2` o `protocolo-er-v1`).
+
 ## Desarrollo
 
 Se usa HTML, CSS y JavaScript sin compilación. Ejecuta desde esta carpeta:
@@ -52,16 +76,19 @@ Abre `http://127.0.0.1:4173`. Edita `content.js` para cambiar retos, opciones, s
 Pruebas de contenido y calificación, con Node.js:
 
 ```sh
-node --test tests/content.test.cjs
+node --test tests/content.test.cjs tests/joins.test.cjs
 ```
 
 Prueba del recorrido en navegador, con servidor iniciado, Playwright para Python, Chromium y `pdftotext` disponibles:
 
 ```sh
 python3 tests/browser_test.py
+python3 tests/joins_browser_test.py
 ```
 
 Las capturas e informe de prueba se guardan en `/tmp/bdjuego-qa/`, fuera del repositorio. El test cubre respuestas incompletas, nota mixta, pistas, cierre de corrección, recargas, PDF con seis imágenes, visor ampliado, reinicio, móvil, nota cero, datos corruptos, escape de texto, almacenamiento bloqueado y recuperación de partidas de la primera edición. Requiere también `pdfimages` para comprobar las imágenes incrustadas en el informe.
+
+Las pruebas SQL verifican las consultas de referencia y los conteos con el motor real, soluciones equivalentes, duplicados, NULL, orden, solo lectura, límite de filas y conservación del dataset. El recorrido del navegador verifica ejecución, errores, timeout, fallo recuperable de carga, separación de actividades, guardado, nota y PDF tanto con aciertos como con nota cero. Sus capturas e informes se guardan en `/tmp/bdjuego-joins-qa/`.
 
 ## GitHub Pages
 
@@ -71,4 +98,5 @@ Publicación estática desde la raíz de la rama `main`: **Settings → Pages �
 
 - Ilustración SVG y diseño creados para este proyecto.
 - [jsPDF 4.2.1](https://github.com/parallax/jsPDF/tree/v4.2.1), distribuido localmente en `vendor/`, licencia MIT adjunta. El PDF usa Helvetica para textos en español y otros caracteres latinos; otros alfabetos requieren una fuente Unicode incrustada.
+- [sql.js 1.16.0](https://github.com/sql-js/sql.js), distribuido localmente en `vendor/sqljs/` con su licencia MIT. SQLite es de dominio público.
 - [DM Sans](https://fonts.google.com/specimen/DM+Sans) y [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk), alojadas localmente en `assets/`, con sus licencias SIL Open Font License.
